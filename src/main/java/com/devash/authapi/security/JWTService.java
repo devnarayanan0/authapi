@@ -8,7 +8,7 @@ import java.util.Date;
 @Service
 public class JWTService {
 
-    private final String SECRET_KEY = "mysecretkeymysecretkeymysecretkey";
+    private final String SECRET_KEY = "qwertyuiopasdfghjklzxcvbnm123456";
     public String generateToken(String username) {
 
         return Jwts.builder()
