@@ -579,7 +579,7 @@
 <!-- ── JavaScript ─────────────────────────────────── -->
 <script>
     // ── Config ─────────────────────────────────────────────
-    const BASE_URL  = 'http://127.0.0.1:8080/auth';
+    const BASE_URL = 'http://localhost:8080/auth';
     let   activeTab = 'login';
 
     // ── Tab Switching ──────────────────────────────────────
@@ -639,8 +639,14 @@
                 if (activeTab === 'login' && data.token) {
                     // Store token in localStorage
                     localStorage.setItem('jwt_token', data.token);
+
                     showMessage('success', data.message || 'Authentication successful.');
                     showToken(data.token);
+
+                    // Redirect to dashboard after successful login
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1200);
                 } else {
                     showMessage('success', data.message || 'Account created successfully.');
                 }

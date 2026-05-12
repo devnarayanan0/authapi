@@ -22,31 +22,38 @@ public class AuthService {
         String username = loginDTO.getUsername();
         String password = loginDTO.getPassword();
         //
-        if(username == null || password == null) {
-            return new AuthDTO(
-                    null,"(Username or Password)?Val==NULL", LocalDateTime.now().toString()
-            );
-        }
-        User user = userRepository.findByUsername(username);
-        if (user != null) {
-            if (password.equals(user.getPassword())) {
-                String tok = jwtService.generateToken(username);
-                return new AuthDTO(
-                        tok,
-                        "Login Successful",
-                        LocalDateTime.now().toString()
-                );
-            }
-        } else {
+        if (username == null || password == null) {
             return new AuthDTO(
                     null,
-                    "(Login Failed)? Invalid Credentials",
+                    "Username or Password cannot be null",
                     LocalDateTime.now().toString()
             );
         }
-        //
+
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            return new AuthDTO(
+                    null,
+                    "Username not found",
+                    LocalDateTime.now().toString()
+            );
+        }
+
+        if (!password.equals(user.getPassword())) {
+            return new AuthDTO(
+                    null,
+                    "Incorrect password",
+                    LocalDateTime.now().toString()
+            );
+        }
+
+        String tok = jwtService.generateToken(username);
+
         return new AuthDTO(
-                null,"(Login Failed)? Invalid Credentials",LocalDateTime.now().toString()
+                tok,
+                "Login Successful",
+                LocalDateTime.now().toString()
         );
     }
 

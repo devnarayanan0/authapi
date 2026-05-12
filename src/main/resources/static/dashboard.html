@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Employee Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Epilogue:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+    <style>
+        /* ──────────────────────────────────────────────────────────
+           CSS Variables — same design token system as login.html
+           so the whole app feels cohesive.
+        ────────────────────────────────────────────────────────── */
+        :root {
+            --bg:           #f0ede8;
+            --surface:      #ffffff;
+            --surface2:     #f7f5f2;
+            --border:       #e0dbd3;
+            --accent:       #1a3a5c;
+            --accent-mid:   #2a5480;
+            --accent-light: #1a3a5c14;
+            --success:      #1a6644;
+            --error:        #8b1a2a;
+            --error-bg:     #fdf0f2;
+            --error-bdr:    #e8b8c0;
+            --text:         #1c1814;
+            --text-mid:     #4a4540;
+            --text-muted:   #8a847c;
+            --text-dim:     #c0bbb5;
+            --shadow-sm:    0 1px 3px #00000010;
+            --shadow-md:    0 4px 16px #00000010, 0 2px 6px #00000008;
+            --shadow-lg:    0 12px 48px #1a3a5c14, 0 4px 16px #00000010;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body:    'Epilogue', sans-serif;
+            --radius:       14px;
+            --radius-sm:    8px;
+            --transition:   0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Subtle ambient background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                    radial-gradient(ellipse 70% 50% at 10% 5%, #ffffff70 0%, transparent 55%),
+                    radial-gradient(ellipse 50% 60% at 90% 95%, #d4cfc870 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── Top Navigation Bar ────────────────────────────────── */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 32px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-logo {
+            width: 32px; height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-logo svg { width: 16px; height: 16px; fill: #fff; }
+
+        .nav-title {
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: -0.2px;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .nav-user {
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        .nav-user strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            padding: 7px 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-mid);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* ── Page Content ──────────────────────────────────────── */
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 32px 60px;
+        }
+
+        /* ── Page Header ───────────────────────────────────────── */
+        .page-header {
+            margin-bottom: 36px;
+            animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .page-subtitle span {
+            font-weight: 600;
+            color: var(--text-mid);
+        }
+
+        /* ── Stats Bar ─────────────────────────────────────────── */
+        .stats-bar {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+            animation: fadeUp 0.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .stat-chip {
+            padding: 8px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-chip strong {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .stat-dot {
+            width: 6px; height: 6px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+
+        /* ── Employee Grid ─────────────────────────────────────── */
+        /*
+         *  CSS Grid with auto-fill: the browser automatically
+         *  decides how many columns fit based on screen width.
+         *  minmax(280px, 1fr) means each column is at least
+         *  280px wide but can grow to fill available space.
+         */
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* ── Employee Card ─────────────────────────────────────── */
+        /*
+         *  Each card is created dynamically in JavaScript (see below).
+         *  The stagger animation uses animation-delay so cards
+         *  appear one-by-one like a reveal.
+         */
+        .employee-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+            animation: cardIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* The staggered animation delay is set inline via JS */
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+
+        .employee-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: #c8c2bb;
+        }
+
+        /* Subtle colour accent stripe at top of each card */
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-mid));
+            opacity: 0;
+            transition: opacity var(--transition);
+        }
+
+        .employee-card:hover::before { opacity: 1; }
+
+        /* ── Card: Avatar ──────────────────────────────────────── */
+        .card-avatar {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: var(--accent-light);
+            border: 1px solid var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* ── Card: Name ────────────────────────────────────────── */
+        .card-name {
+            font-family: var(--font-display);
+            font-size: 17px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.2px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-org {
+            font-size: 11.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        /* ── Card: Detail Rows ─────────────────────────────────── */
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .card-detail {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .detail-icon {
+            flex-shrink: 0;
+            margin-top: 1px;
+            width: 13px; height: 13px;
+            stroke: var(--text-dim);
+        }
+
+        .card-detail strong {
+            color: var(--text-mid);
+            font-weight: 500;
+        }
+
+        /* ── Card: Salary Badge ────────────────────────────────── */
+        .salary-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 14px;
+            padding: 5px 12px;
+            background: var(--accent-light);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: -0.2px;
+        }
+
+        /* ── Loading State ─────────────────────────────────────── */
+        .loading-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .skeleton-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            animation: shimmer 1.4s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.5; }
+        }
+
+        .skel-line {
+            background: var(--border);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .skel-avatar { width: 44px; height: 44px; border-radius: 12px; background: var(--border); margin-bottom: 16px; }
+        .skel-h      { height: 16px; }
+        .skel-sm     { height: 10px; width: 60%; }
+        .skel-md     { height: 10px; width: 80%; }
+        .skel-full   { height: 10px; width: 100%; }
+
+        /* ── Error State ───────────────────────────────────────── */
+        .error-state {
+            text-align: center;
+            padding: 60px 32px;
+            background: var(--surface);
+            border: 1px solid var(--error-bdr);
+            border-radius: var(--radius);
+            background: var(--error-bg);
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .error-state h3 {
+            font-family: var(--font-display);
+            font-size: 20px;
+            color: var(--error);
+            margin-bottom: 8px;
+        }
+
+        .error-state p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+        .retry-btn {
+            padding: 10px 24px;
+            background: var(--accent);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .retry-btn:hover { background: var(--accent-mid); transform: translateY(-1px); }
+
+        /* ── Empty State ───────────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 32px;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: var(--radius);
+            grid-column: 1 / -1;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .empty-state h3 {
+            font-family: var(--font-display);
+            font-size: 20px;
+            color: var(--text-mid);
+            margin-bottom: 8px;
+        }
+
+        .empty-state p { font-size: 13px; color: var(--text-muted); }
+
+        /* ── Responsive ────────────────────────────────────────── */
+        @media (max-width: 600px) {
+            .page  { padding: 24px 16px 48px; }
+            .navbar { padding: 0 16px; }
+            .stats-bar { flex-wrap: wrap; gap: 8px; }
+            .page-title { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── Navigation Bar ──────────────────────────────────────── -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <div class="nav-logo">
+            <svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 10.14 8 11.25C16.5 22.14 20 17.25 20 12V6l-8-4z"/></svg>
+        </div>
+        <span class="nav-title">Dev Ash Portal</span>
+    </div>
+    <div class="nav-right">
+        <span class="nav-user">Logged in as <strong id="nav-username">—</strong></span>
+        <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+</nav>
+
+<!-- ── Main Page ────────────────────────────────────────────── -->
+<main class="page">
+
+    <div class="page-header">
+        <h1 class="page-title">Employee Directory</h1>
+        <p class="page-subtitle" id="page-subtitle">Loading employees…</p>
+    </div>
+
+    <!-- Stats chips appear after data loads -->
+    <div class="stats-bar" id="stats-bar" style="display:none">
+        <div class="stat-chip"><div class="stat-dot"></div> <strong id="stat-count">0</strong> employees</div>
+        <div class="stat-chip">Avg salary: <strong id="stat-avg">—</strong></div>
+        <div class="stat-chip">Endpoint: <strong>GET /employee/all</strong></div>
+    </div>
+
+    <!-- Employee cards are injected here by JavaScript -->
+    <div id="cards-container"></div>
+
+</main>
+
+<!-- ──────────────────────────────────────────────────────────
+     JavaScript — the "Frontend Brain"
+
+     Execution flow:
+       1. Page loads → checkAuth() runs
+       2. If no token in localStorage → redirect to login.html
+       3. fetchEmployees() calls GET /employee/all
+       4. For each employee in the JSON array → renderCard()
+       5. Each renderCard() builds an HTML string and injects it
+
+     Key concepts used here:
+       fetch()        → browser's built-in HTTP client
+       async/await    → clean syntax for asynchronous code
+       response.json()→ parses the JSON response body
+       innerHTML      → inserts HTML string into the DOM
+       template literals (`) → easy multi-line HTML strings
+───────────────────────────────────────────────────────────── -->
+<script>
+    const API_BASE = 'http://localhost:8080';
+
+    // ── 1. Auth Guard ───────────────────────────────────────────
+    // Run as soon as the page loads.
+    // If the user has no token they shouldn't be here → redirect.
+    function checkAuth() {
+        const token    = localStorage.getItem('jwt_token');
+        const username = localStorage.getItem('username') || 'User';
+
+        if (!token) {
+            // No token found — send back to login
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Show the username in the nav bar
+        document.getElementById('nav-username').textContent = username;
+    }
+
+    // ── 2. Logout ───────────────────────────────────────────────
+    function logout() {
+        localStorage.removeItem('jwt_token');
+        localStorage.removeItem('username');
+        window.location.href = 'login.html';
+    }
+
+    // ── 3. Skeleton Loader ──────────────────────────────────────
+    // Shows placeholder cards while we wait for the API response.
+    // This gives users immediate feedback that something is loading.
+    function showSkeletons(count = 6) {
+        const container = document.getElementById('cards-container');
+        const skeletonHTML = Array.from({ length: count }, () => `
+            <div class="skeleton-card">
+                <div class="skel-line skel-avatar"></div>
+                <div class="skel-line skel-h"  ></div>
+                <div class="skel-line skel-sm" ></div>
+                <div style="height:16px"></div>
+                <div class="skel-line skel-md" ></div>
+                <div class="skel-line skel-full"></div>
+                <div class="skel-line skel-sm" ></div>
+            </div>
+        `).join('');
+
+        container.innerHTML = `<div class="loading-grid">${skeletonHTML}</div>`;
+    }
+
+    // ── 4. Fetch Employees ──────────────────────────────────────
+    // Calls GET /employee/all on the Spring Boot backend.
+    // The backend returns a JSON array of Employee objects.
+    async function fetchEmployees() {
+        showSkeletons();
+
+        try {
+            // fetch() returns a Promise<Response>
+            // await pauses here until the HTTP response arrives
+            const response = await fetch(`${API_BASE}/employee/all`);
+
+            // Check if HTTP status is in the 200–299 range
+            if (!response.ok) {
+                throw new Error(`Server returned ${response.status}`);
+            }
+
+            // response.json() parses the JSON body into a JS array
+            // Each element looks like:
+            // { id: 1, name: "Alice", address: "…", organization: "…", salary: 85000.0 }
+            const employees = await response.json();
+
+            renderEmployees(employees);
+
+        } catch (err) {
+            showError(err.message);
+        }
+    }
+
+    // ── 5. Render All Employees ─────────────────────────────────
+    // Takes the array from the API and renders one card per employee.
+    function renderEmployees(employees) {
+        const container = document.getElementById('cards-container');
+
+        // Handle empty database
+        if (!employees || employees.length === 0) {
+            container.innerHTML = `
+                <div class="employee-grid">
+                    <div class="empty-state">
+                        <h3>No employees yet</h3>
+                        <p>POST to /employee/add to add your first employee.</p>
+                    </div>
+                </div>`;
+            document.getElementById('page-subtitle').textContent = '0 employees found.';
+            return;
+        }
+
+        // Update subtitle and stats bar
+        document.getElementById('page-subtitle').innerHTML =
+            `Showing <span>${employees.length}</span> employee${employees.length !== 1 ? 's' : ''} from the database.`;
+
+        const avgSalary = employees.reduce((sum, e) => sum + (e.salary || 0), 0) / employees.length;
+        document.getElementById('stat-count').textContent = employees.length;
+        document.getElementById('stat-avg').textContent   = formatSalary(avgSalary);
+        document.getElementById('stats-bar').style.display = 'flex';
+
+        // Build the grid HTML by mapping each employee → card HTML string
+        // The animation-delay staggers each card by 60ms so they cascade in
+        const cardsHTML = employees.map((emp, index) =>
+            buildCardHTML(emp, index)
+        ).join('');
+
+        container.innerHTML = `<div class="employee-grid">${cardsHTML}</div>`;
+    }
+
+    // ── 6. Build One Card's HTML ────────────────────────────────
+    // Returns an HTML string for a single employee.
+    // Uses template literals for readable multi-line HTML.
+    function buildCardHTML(employee, index) {
+        // Generate avatar initials from the employee's name
+        // e.g. "Alice Johnson" → "AJ"
+        const initials = employee.name
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+
+        // Format salary as currency
+        const formattedSalary = formatSalary(employee.salary);
+
+        // animation-delay creates the stagger cascade effect
+        const delay = `${index * 60}ms`;
+
+        // Template literal builds the card HTML
+        // Each field maps directly to an Employee entity field
+        return `
+            <div class="employee-card" style="animation-delay: ${delay}">
+
+                <!-- Avatar: initials of the employee's name -->
+                <div class="card-avatar">${initials}</div>
+
+                <!-- Name: employee.name from the entity -->
+                <div class="card-name" title="${escapeHTML(employee.name)}">${escapeHTML(employee.name)}</div>
+
+                <!-- Organization: employee.organization from the entity -->
+                <div class="card-org">${escapeHTML(employee.organization)}</div>
+
+                <div class="card-details">
+                    <!-- Address: employee.address from the entity -->
+                    <div class="card-detail">
+                        <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                            <circle cx="12" cy="9" r="2.5"/>
+                        </svg>
+                        <span>${escapeHTML(employee.address)}</span>
+                    </div>
+                    <!-- ID: shown for reference while learning -->
+                    <div class="card-detail">
+                        <svg class="detail-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="16" rx="2"/>
+                            <path d="M7 9h10M7 13h6"/>
+                        </svg>
+                        <span>Employee ID: <strong>#${employee.id}</strong></span>
+                    </div>
+                </div>
+
+                <!-- Salary badge: employee.salary from the entity -->
+                <div class="salary-badge">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    ${formattedSalary}
+                </div>
+            </div>`;
+    }
+
+    // ── 7. Error State ──────────────────────────────────────────
+    function showError(message) {
+        const container = document.getElementById('cards-container');
+        document.getElementById('page-subtitle').textContent = 'Failed to load employees.';
+
+        container.innerHTML = `
+            <div class="error-state">
+                <h3>Could not load employees</h3>
+                <p>${escapeHTML(message || 'Make sure Spring Boot is running on port 8080.')}</p>
+                <button class="retry-btn" onclick="fetchEmployees()">Try Again</button>
+            </div>`;
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────
+
+    // Format a number as currency: 85000 → "₹85,000"
+    // Adjust the locale/currency to match your region.
+    function formatSalary(amount) {
+        if (amount == null) return '—';
+        return new Intl.NumberFormat('en-IN', {
+            style:           'currency',
+            currency:        'INR',
+            maximumFractionDigits: 0,
+        }).format(amount);
+    }
+
+    // Prevent XSS: escape HTML special characters in user data
+    // before injecting into innerHTML.
+    function escapeHTML(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(String(str)));
+        return div.innerHTML;
+    }
+
+    // ── Kick things off ─────────────────────────────────────────
+    checkAuth();
+    fetchEmployees();
+</script>
+</body>
+</html>
