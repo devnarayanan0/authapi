@@ -1,5 +1,6 @@
 package com.devash.authapi.service;
 
+import com.devash.authapi.dto.UserProfileDTO;
 import com.devash.authapi.entity.User;
 import com.devash.authapi.dto.AuthDTO;
 import com.devash.authapi.dto.LoginDTO;
@@ -79,5 +80,11 @@ public class AuthService {
                     LocalDateTime.now().toString()
             );
         }
+    }
+
+    public UserProfileDTO getCurrentUser(String username){
+        return new UserProfileDTO(
+                username
+        );
     }
 }

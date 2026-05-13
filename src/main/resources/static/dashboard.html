@@ -500,22 +500,42 @@
 ───────────────────────────────────────────────────────────── -->
 <script>
     const API_BASE = 'http://localhost:8080';
+    const token = localStorage.getItem('jwt_token');
 
     // ── 1. Auth Guard ───────────────────────────────────────────
     // Run as soon as the page loads.
     // If the user has no token they shouldn't be here → redirect.
     function checkAuth() {
-        const token    = localStorage.getItem('jwt_token');
-        const username = localStorage.getItem('username') || 'User';
-
         if (!token) {
             // No token found — send back to login
             window.location.href = 'login.html';
             return;
         }
 
-        // Show the username in the nav bar
-        document.getElementById('nav-username').textContent = username;
+        loadCurrentUser();
+    }
+
+    async function loadCurrentUser() {
+        try {
+            const response = await fetch(`${API_BASE}/auth/me`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Session expired');
+            }
+
+            const user = await response.json();
+
+            document.getElementById('nav-username').textContent = user.username;
+
+        } catch (error) {
+            localStorage.removeItem('jwt_token');
+            window.location.href = 'login.html';
+        }
     }
 
     // ── 2. Logout ───────────────────────────────────────────────
@@ -554,7 +574,11 @@
         try {
             // fetch() returns a Promise<Response>
             // await pauses here until the HTTP response arrives
-            const response = await fetch(`${API_BASE}/employee/all`);
+            const response = await fetch(`${API_BASE}/employee/all`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
             // Check if HTTP status is in the 200–299 range
             if (!response.ok) {
