@@ -607,24 +607,6 @@
         </form>
     </div>
 </div>
-
-<!-- ──────────────────────────────────────────────────────────
-     JavaScript — the "Frontend Brain"
-
-     Execution flow:
-       1. Page loads → checkAuth() runs
-       2. If no token in localStorage → redirect to login.html
-       3. fetchEmployees() calls GET /employee/all
-       4. For each employee in the JSON array → renderCard()
-       5. Each renderCard() builds an HTML string and injects it
-
-     Key concepts used here:
-       fetch()        → browser's built-in HTTP client
-       async/await    → clean syntax for asynchronous code
-       response.json()→ parses the JSON response body
-       innerHTML      → inserts HTML string into the DOM
-       template literals (`) → easy multi-line HTML strings
-───────────────────────────────────────────────────────────── -->
 <script>
     const API_BASE = 'http://localhost:8080';
     const token = localStorage.getItem('jwt_token');
@@ -826,6 +808,20 @@
         return `
             <div class="employee-card" style="animation-delay: ${delay}">
 
+                <div style="position:absolute; top:14px; right:14px; display:flex; gap:8px; z-index:10;">
+
+                    <button onclick="editEmployee('${employee.id}')"
+                            style="width:32px;height:32px;border:none;border-radius:10px;background:#f1f1f1;cursor:pointer;font-size:14px;">
+                        ✏️
+                    </button>
+
+                    <button onclick="deleteEmployee('${employee.id}')"
+                            style="width:32px;height:32px;border:none;border-radius:10px;background:#ffeaea;cursor:pointer;font-size:14px;">
+                        🗑️
+                    </button>
+
+                </div>
+
                 <!-- Avatar: initials of the employee's name -->
                 <div class="card-avatar">${initials}</div>
 
@@ -878,6 +874,14 @@
     }
 
     // ── Helpers ─────────────────────────────────────────────────
+
+    function editEmployee(id) {
+        alert('Edit Employee: ' + id);
+    }
+
+    function deleteEmployee(id) {
+        alert('Delete Employee: ' + id);
+    }
 
     // Format a number as currency: 85000 → "₹85,000"
     // Adjust the locale/currency to match your region.
